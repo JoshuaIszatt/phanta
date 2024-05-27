@@ -1,0 +1,19 @@
+name: phanta
+channels:
+  - bioconda
+  - conda-forge
+  - anaconda
+  - defaults
+dependencies:
+  - python>=3
+  - checkv==1.0.3
+  - biopython==1.83
+  - bbmap==39.06
+  - pandas==2.2.1
+  - matplotlib==3.8.4
+  - spades==3.15.5
+  - fastqc==0.12.1
+  - snippy==4.6.0
+  - pilon==1.24
+  - packaging
+  - deprecated
