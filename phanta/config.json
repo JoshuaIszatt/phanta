@@ -1,0 +1,42 @@
+{
+ "phanatic": {
+  "version": "3.0.0",
+  "image": "iszatt/phanatic:3.0.0",
+  "author": "Joshua J Iszatt",
+  "contributors": [],
+  "citation": "pending"
+ },
+ "pipeline": {
+  "clean": true,
+  "trim": true,
+  "dedupe": true,
+  "normalise": true,
+  "fastqc": true,
+  "mapping": true,
+  "re_assembly": true,
+  "identify_termini": false
+ },
+ "system": {
+  "RAM": 24000,
+  "threads": 8
+ },
+ "input": {
+  "se_ext": "_interleaved.fastq",
+  "r1_ext": "_R1.fastq.gz",
+  "r2_ext": "_R2.fastq.gz",
+  "ont": ".bam"
+ },
+ "trim": {
+  "read_length": 150,
+  "trim_length": 10,
+  "minimum_length": 100,
+  "read_quality": 30
+ },
+ "normalise": {
+  "target_coverage": 100
+ },
+ "barcoding": {
+  "prefix": "phage",
+  "barcode_length": 5
+ }
+}
