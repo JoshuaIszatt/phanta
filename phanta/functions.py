@@ -1,8 +1,80 @@
 import os
+import json
 import subprocess
+import pandas as pd
+import matplotlib.pyplot as plt
 from Bio import SeqIO
 from deprecated import deprecated
+from .classes import ConfigFileError, PipelineError, Reads
 from .decorators import experimental
+import importlib.resources
+
+
+# _____________________________________________________BASE
+
+
+def configure_defaults(config_path=None):
+    if config_path is None:
+        config_path = importlib.resources.files("phanta") / "config.json"
+    with open(str(config_path), "r") as f:
+        try:
+            config = json.load(f)
+        except json.JSONDecodeError:
+            raise ConfigFileError("Default config file is broken, please reinstall.")
+    return config
+
+
+# _____________________________________________________BIO
+
+
+def find_paired_reads(input_directory, file_extension_1, file_extension_2,
+                      read_type=None, exclude=None):
+    if read_type is None:
+        read_type = "paired"
+    files = os.listdir(input_directory)
+    for file in files:
+        if file in exclude:
+            print(f"Skipping {file}")
+            files.remove(file)
+    read_pairs = []
+    for file in files:
+        filepath_1 = os.path.join(input_directory, file)
+        if file.endswith(file_extension_1):
+            cut = len(file_extension_1)
+            name = file[:-cut]
+            filepath_2 = os.path.join(input_directory, name + file_extension_2)
+            if os.path.isfile(filepath_2):
+                pair = Reads(name=name,
+                             read_type=read_type,
+                             read_1=os.path.abspath(filepath_1),
+                             read_2=os.path.abspath(filepath_2)
+                             )
+                read_pairs.append(pair)
+    return read_pairs
+
+
+def find_interleaved_reads(input_directory, file_extension,
+                           read_type=None, exclude=None):
+    if type is None:
+        read_type = 'unpaired'
+    files = os.listdir(input_directory)
+    for file in files:
+        if file in exclude:
+            print(f"Skipping {file}")
+            files.remove(file)
+    reads = []
+    for file in files:
+        filepath = os.path.join(input_directory, file)
+        if file.endswith(file_extension):
+            cut = len(file_extension)
+            name = file[:-cut]
+            interleaved_reads = Reads(name=name,
+                                      read_type=read_type,
+                                      read_1=os.path.abspath(filepath),
+                                      read_2=None)
+            reads.append(interleaved_reads)
+    return reads
+
 
 def interleave_reads(read_1, read_2, output_file, ram_mb=20000):
     command = [
@@ -156,7 +228,8 @@ def fastqc(reads, output_directory):
         print("Reads QC failed")
 
 
-def spades_assembly(input_reads, output_directory, ram_mb=20000, threads=8):
+def spades_assembly(input_reads, output_directory, ram_mb=20000, threads=8,
+                    kmers="55,77,99,127"):
     input_reads_path = os.path.abspath(input_reads)
     output_path = os.path.abspath(output_directory)
     ram_gb = int(ram_mb / 1000)
@@ -166,13 +239,18 @@ def spades_assembly(input_reads, output_directory, ram_mb=20000, threads=8):
         "-m", f"{ram_gb}",
         "--only-assembler",
         "--careful",
-        "-k", "55,77,99,127",
+        "-k", kmers,
         "-o", f"{output_path}",
         "--12", f"{input_reads_path}"
     ]
     try:
         subprocess.run(command, check=True)
         print(f"SPAdes genome assembly finished successfully")
+        contigs = os.path.join(output_path, "contigs.fasta")
+        if os.path.exists(contigs):
+            return contigs
+        else:
+            return None
     except Exception as e:
         print(f"SPAdes genome assembly failed {e}")
         raise
@@ -219,7 +297,8 @@ def pilon_polish(genome_fasta, reads_bam, output_directory):
         raise
 
 
-def read_mapping(contigs_fasta, reads, output_directory, ram_mb=20000, mapped_sam=False):
+def read_mapping(contigs_fasta, reads, output_directory, ram_mb=20000,
+                 keep_reads=False):
     covstats = os.path.join(output_directory, "covstats.tsv")
     basecov = os.path.join(output_directory, "basecov.tsv")
     scafstats = os.path.join(output_directory, "scafstats.tsv")
@@ -227,6 +306,8 @@ def read_mapping(contigs_fasta, reads, output_directory, ram_mb=20000, mapped_sa
     aqhist = os.path.join(output_directory, "aqhist.tsv")
     lhist = os.path.join(output_directory, "lhist.tsv")
     gchist = os.path.join(output_directory, "gchist.tsv")
+    mapped = None
+    unmapped = None
     command = [
         "bbmap.sh",
         f"-Xmx{ram_mb}m",
@@ -241,39 +322,18 @@ def read_mapping(contigs_fasta, reads, output_directory, ram_mb=20000, mapped_sa
         f"gchist={gchist}",
         "nodisk"
     ]
-    if mapped_sam:
-        mapped = os.path.join(output_directory, "mapped.sam")
+    if keep_reads:
+        mapped = os.path.join(output_directory, "mapped.fastq.gz")
+        unmapped = os.path.join(output_directory, "unmapped.fastq.gz")
         command.append(f"out={mapped}")
-    else:
-        mapped = False
+        command.append(f"outu={unmapped}")
     try:
         subprocess.run(command, check=True)
         print(f"Reads mapped")
-        return basecov, covstats, scafstats, mapped
+        return basecov, covstats, scafstats, mapped, unmapped
     except Exception as e:
         print(f"Read mapping failed: {e}")
-        raise Exception(f"Read mapping failed {e}")
-
-
-def split_mapped_reads(putative_genome, reads, output_directory, ram_mb=20000):
-    mapped = os.path.join(output_directory, "mapped.fastq.gz")
-    unmapped = os.path.join(output_directory, "unmapped.fastq.gz")
-    command = [
-        "bbmap.sh",
-        f"-Xmx{ram_mb}m",
-        f"ref={putative_genome}",
-        f"in={reads}",
-        f"outm={mapped}",
-        f"outu={unmapped}",
-        "nodisk"
-    ]
-    try:
-        subprocess.run(command, check=True)
-        print(f"Reads mapped and split")
-        return mapped, unmapped
-    except Exception as e:
-        print(f"Read mapping failed: {e}")
-        raise
+        raise PipelineError(f"Read mapping failed {e}")
 
 
 def extract_contig(contigs_fasta, header, output_file, rename=None):
@@ -322,18 +382,25 @@ def checkv(contigs, output_directory):
         print("CheckV failed")
 
 
-def snippy(reference_genome, reads, output_directory):
-    command = [
-        "snippy",
-        "--ref", reference_genome,
-        "--outdir", output_directory,
-        "--peil", reads,
-        "--report",
-        "--cleanup"
-    ]
-    try:
-        subprocess.run(command, check=True)
-        print("snippy successful")
-    except subprocess.CalledProcessError:
-        print("snippy failed")
-    pass
+def generate_coverage_graph(header, basecov, output_directory):
+    headers = ["ID", "Pos", "Coverage"]
+    df = pd.read_csv(basecov, sep='\t', comment='#', names=headers)
+    coverage = df[df['ID'].str.contains(header)]
+    # Plot
+    x_values = coverage['Pos']
+    y_values = coverage['Coverage']
+    plt.figure(figsize=(15, 8))
+    plt.plot(x_values,
+             y_values,
+             marker=',',
+             markersize=0.1,
+             linestyle='-',
+             color='b')
+    plt.title(f"Per base coverage for {header}")
+    plt.xlabel("Position")
+    plt.ylabel("Coverage")
+    plt.grid(True)
+    plt.axhline(y=400, color='red', linestyle=':')
+    plt.axhline(y=100, color='red', linestyle='-')
+    outfile = os.path.join(output_directory, f"{header}.png")
+    plt.savefig(outfile, dpi=300)
