@@ -23,6 +23,8 @@ def configure_defaults(config_path=None):
             raise ConfigFileError("Default config file is broken, please reinstall.")
     return config
 
+# todo Create get_config() function to obtain the default config file
+# todo Create write_config(config) function (and add this to pipeline)
 
 # _____________________________________________________BIO
 

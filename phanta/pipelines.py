@@ -152,7 +152,7 @@ def assembly_pipeline(reads_class, output_dir, config_file=None, qc_only=False,
         return
 
     # Assembly 1
-    out = os.path.join(out_dir, "SPAdes_normalised")
+    out = os.path.join(out_dir, "SPAdes_initial")
     contigs = spades_assembly(
         input_reads=normalised_reads,
         output_directory=out,
@@ -216,7 +216,7 @@ def assembly_pipeline(reads_class, output_dir, config_file=None, qc_only=False,
         )
 
         # Read mapping
-        out = os.path.join(out_dir, 'QC_read_mapping')
+        out = os.path.join(out_dir, 'QC_read_remapping')
         basecov, covstats, scafstats, mapped, unmapped = read_mapping(
             contigs_fasta=contigs,
             reads=merged_reads,
