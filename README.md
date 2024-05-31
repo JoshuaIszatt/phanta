@@ -5,31 +5,31 @@ Configurable short read assembly pipeline for phages:
 
 ## Install dependencies
 1. Download the yml environment file:
-```
+```sh
 wget https://anaconda.org/JoshIszatt/phanta/2024.05.31.130738/download/phanta.yml
 ```
 
 2. Create the environment
-```
+```sh
 conda env create --file phanta.yml
 ```
 
 3. Activate the environment:
-```
+```sh
 conda activate phanta
 ```
 
 4. Install phanta pipeline:
-```
+```sh
 pip install phanta
 ```
 
 5. Optional: Setup the checkv database 
-```
+```sh
 checkv download_database /path/to/checkv-db
 ```
 
-```
+```sh
 export CHECKVDB=/path/to/checkv-db
 ```
 
@@ -47,18 +47,23 @@ import phanta
 reads = phanta.detect_reads('path_to_input_directory/')
 ```
 
-Single phage assembly:
+Single phage assembly (Uses the default configurations below if no config parameter is specified):
 ```py
 import phanta
 reads = phanta.detect_reads('path_to_input_directory/')
 phanta.assembly_pipeline(reads[0], 'output_directory/')
 ```
 
-Batch phage assembly:
+Batch phage assembly (Using your own edited config file):
 ```py
 import phanta
-reads = phanta.detect_reads('path_to_input_directory/')
-phanta.batch_assembly_pipeline(reads, 'output_directory/')
+phanta.batch_assembly_pipeline('path_to_input_directory/', 'output_directory/', config_file='/path_to_config.json')
+```
+
+Reads QC only:
+```py
+import phanta
+phanta.batch_assembly_pipeline('path_to_input_directory/', 'output_directory/', qc_only=True)
 ```
 
 ## Dependencies:
