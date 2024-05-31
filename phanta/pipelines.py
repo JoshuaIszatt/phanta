@@ -248,14 +248,6 @@ def assembly_pipeline(reads_class, output_dir, config_file=None, qc_only=False,
             output_directory=out_dir
         )
 
-        # CheckV
-        if os.getenv('CHECKVDB'):
-            out = os.path.join(out_dir, 'CheckV')
-            checkv(
-                contigs=contigs,
-                output_directory=out
-            )
-
     # Polishing
     # todo add polishing to set 1 and 2
 

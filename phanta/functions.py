@@ -359,16 +359,6 @@ def extract_contig(contigs_fasta, header, output_file, rename=None):
                         raise Exception(f"Could not extract {output_file}: {e}")
 
 
-@experimental(description="Needs improvements")
-def split_multifasta(input_file, output_dir):
-    os.makedirs(output_dir, exist_ok=True)
-    with open(input_file, "r") as input_handle:
-        for record in SeqIO.parse(input_handle, "fasta"):
-            output_file = os.path.join(output_dir, f"{record.id}.fasta")
-            with open(output_file, "w") as output_handle:
-                SeqIO.write(record, output_handle, "fasta")
-
-
 def checkv(contigs, output_directory):
     command = [
         "checkv", "end_to_end",
