@@ -11,8 +11,12 @@ setup(
     author="Joshua J Iszatt",
     author_email="joshiszatt@gmail.com",
     classifiers=[
-        "Development Status :: 1 - Planning",
+        "Development Status :: 3 - Alpha",
     ],
     python_requires=">=3.10",
     packages=find_packages(include=['phanta', 'phanta.*']),
+    package_data={
+        'phanta': ['config.json'],
+    },
 )
+
