@@ -3,6 +3,7 @@ import pandas as pd
 from .classes import PipelineError
 from .functions import (
     configure_defaults,
+    configure_log,
     find_paired_reads,
     find_interleaved_reads,
     interleave_reads,
@@ -66,8 +67,15 @@ def detect_reads(input_directory, config_file=None):
 # _____________________________________________________PIPELINES
 
 
-def assembly_pipeline(reads_class, output_dir, config_file=None, qc_only=False,
-                      stringent=False):
+def assembly_pipeline(reads_class, output_dir, config_file=None, qc_only=False, stringent=False,
+                      logger=None, logfile_location=None, logfile_configuration=None):
+    # Setting logger if None has been passed
+    if logger is None:
+        logger = configure_log(
+            location=logfile_location,
+            configuration=logfile_configuration
+        )
+
     # Set configuration
     if config_file is None:
         config = configure_defaults()
@@ -81,9 +89,18 @@ def assembly_pipeline(reads_class, output_dir, config_file=None, qc_only=False,
         else:
             raise PipelineError("Batch sets of reads classes should be run using batch assembly pipeline")
 
+    # Attempt to use logger
+    try:
+        logger.info(f'Beginning assembly pipeline: {reads_class.name}')
+    except Exception as e:
+        raise Exception(f"Logging error: {e}")
+
     # Creating output directory
     out_dir = os.path.join(output_dir, f"{reads_class.name}")
-    os.makedirs(out_dir, exist_ok=False)
+    if os.path.exists(out_dir):
+        raise PipelineError("Output directory already exists")
+    else:
+        os.makedirs(out_dir)
 
     # Interleave reads
     raw_reads = os.path.join(out_dir, "raw_reads.fastq.gz")
@@ -254,10 +271,31 @@ def assembly_pipeline(reads_class, output_dir, config_file=None, qc_only=False,
 # _____________________________________________________BATCHES
 
 
-def batch_assembly_pipeline(input_dir, output_dir, config_file=None,
-                            qc_only=False, stringent=False):
+def batch_assembly_pipeline(input_dir, output_dir, config_file=None, qc_only=False, stringent=False,
+                            logger=None, logfile_location=None, logfile_configuration=None):
+    # Setting logger if None has been passed
+    if logger is None:
+        logger = configure_log(
+            location=logfile_location,
+            configuration=logfile_configuration
+        )
+
+    # Check inputs
+    if not os.path.isdir(input_dir):
+        e = f'Input directory {input_dir} is not a directory'
+        logger.error(e)
+        raise ValueError(e)
+    else:
+        e = f'Batch assembly pipeline:'
+        logger.info(e)
+        logger.info(f"input_dir: {input_dir}")
+        logger.info(f"output_dir: {output_dir}")
+
     os.makedirs(output_dir, exist_ok=True)
-    reads = detect_reads(input_dir)
+    reads = detect_reads(
+        input_directory=input_dir,
+        config_file=config_file
+    )
     for read in reads:
         try:
             assembly_pipeline(
@@ -265,10 +303,12 @@ def batch_assembly_pipeline(input_dir, output_dir, config_file=None,
                 output_dir=output_dir,
                 config_file=config_file,
                 qc_only=qc_only,
-                stringent=stringent
+                stringent=stringent,
+                logger=logger
             )
         except Exception as e:
             print(f'PipelineError: Reads: {read.name},  {e}')
             continue
 
 # todo Add specific exceptions (pipeline / function errors for debugging purposes)
+# todo Add logging details across pipelines

@@ -8,7 +8,8 @@ from deprecated import deprecated
 from .classes import ConfigFileError, PipelineError, Reads
 from .decorators import experimental
 import importlib.resources
-
+import logging
+import logging.config
 
 # _____________________________________________________BASE
 
@@ -25,6 +26,30 @@ def configure_defaults(config_path=None):
 
 # todo Create get_config() function to obtain the default config file
 # todo Create write_config(config) function (and add this to pipeline)
+
+
+def configure_log(location=None, configuration=None):
+    # Default logging settings if needed
+    if configuration is None:
+        configuration = importlib.resources.files("phunky") / "logging.json"
+    # Read logging configuration
+    with open(str(configuration), "r") as f:
+        config = json.load(f)
+    # Set the log file location
+    logfile = 'phunky.log'
+    if location is None:
+        location = str(importlib.resources.files('phunky'))
+    logfile = os.path.join(location, logfile)
+    # Update the log file path in the logging configuration
+    if 'handlers' in config and 'file' in config['handlers']:
+        config['handlers']['file']['filename'] = logfile
+    # Configure and set first message
+    logging.config.dictConfig(config)
+    logger = logging.getLogger(__name__)
+    logger.info(f"Logging to {logfile}")
+    logger.info(f"Log configuration: {str(config)}")
+    return logger
+
 
 # _____________________________________________________BIO
 
