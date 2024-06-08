@@ -31,14 +31,14 @@ def configure_defaults(config_path=None):
 def configure_log(location=None, configuration=None):
     # Default logging settings if needed
     if configuration is None:
-        configuration = importlib.resources.files("phunky") / "logging.json"
+        configuration = importlib.resources.files("phanta") / "logging.json"
     # Read logging configuration
     with open(str(configuration), "r") as f:
         config = json.load(f)
     # Set the log file location
-    logfile = 'phunky.log'
+    logfile = 'phanta.log'
     if location is None:
-        location = str(importlib.resources.files('phunky'))
+        location = str(importlib.resources.files('phanta'))
     logfile = os.path.join(location, logfile)
     # Update the log file path in the logging configuration
     if 'handlers' in config and 'file' in config['handlers']:

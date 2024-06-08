@@ -33,7 +33,7 @@
         }
     },
     "loggers": {
-        "phunky": {
+        "phanta": {
             "level": "DEBUG",
             "handlers": [
                 "stderr",
