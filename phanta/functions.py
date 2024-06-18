@@ -25,7 +25,6 @@ def configure_defaults(config_path=None):
     return config
 
 # todo Create get_config() function to obtain the default config file
-# todo Create write_config(config) function (and add this to pipeline)
 
 
 def configure_log(location=None, configuration=None):
@@ -39,6 +38,8 @@ def configure_log(location=None, configuration=None):
     logfile = 'phanta.log'
     if location is None:
         location = str(importlib.resources.files('phanta'))
+    # Create logfile location and file if it does not exist
+    os.makedirs(location, exist_ok=True)
     logfile = os.path.join(location, logfile)
     # Update the log file path in the logging configuration
     if 'handlers' in config and 'file' in config['handlers']:

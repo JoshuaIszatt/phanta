@@ -76,18 +76,24 @@ def assembly_pipeline(reads_class, output_dir, config_file=None, qc_only=False, 
             configuration=logfile_configuration
         )
 
-    # Set configuration
+    # Set pipeline configuration
     if config_file is None:
         config = configure_defaults()
+        logger.info(f"Setting default pipeline configuration:")
+        logger.info(config)
     else:
         config = configure_defaults(config_file)
+        logger.info(f"Setting custom pipeline configuration: {config}")
+        logger.info(config)
 
     # Check single element
     if isinstance(reads_class, (list, tuple)):
         if len(reads_class) == 1:
             reads_class = reads_class[0]
         else:
-            raise PipelineError("Batch sets of reads classes should be run using batch assembly pipeline")
+            e = "Batch sets of reads classes should be run using batch assembly pipeline"
+            logger.error(e)
+            raise PipelineError(e)
 
     # Attempt to use logger
     try:
@@ -98,7 +104,9 @@ def assembly_pipeline(reads_class, output_dir, config_file=None, qc_only=False, 
     # Creating output directory
     out_dir = os.path.join(output_dir, f"{reads_class.name}")
     if os.path.exists(out_dir):
-        raise PipelineError("Output directory already exists")
+        e = "Output directory already exists"
+        logger.error(e)
+        raise PipelineError(e)
     else:
         os.makedirs(out_dir)
 

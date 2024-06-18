@@ -24,7 +24,7 @@ conda activate phanta
 pip install phanta
 ```
 
-5. Optional: Setup the checkv database 
+5. Optional: Set up the checkv database 
 ```sh
 checkv download_database /path/to/checkv-db
 ```
