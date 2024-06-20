@@ -71,10 +71,17 @@ def assembly_pipeline(reads_class, output_dir, config_file=None, qc_only=False, 
                       logger=None, logfile_location=None, logfile_configuration=None):
     # Setting logger if None has been passed
     if logger is None:
+        if logfile_location is None:
+            logfile_location = output_dir
         logger = configure_log(
             location=logfile_location,
             configuration=logfile_configuration
         )
+
+    # Check booleans
+    assert isinstance(qc_only, bool), 'Error: qc_only should be a boolean value.'
+    assert isinstance(stringent, bool), 'Error: stringent should be a boolean value.'
+    logger.info(f"Assembly pipeline settings: stringent={stringent}, qc_only={qc_only}")
 
     # Set pipeline configuration
     if config_file is None:
@@ -113,6 +120,7 @@ def assembly_pipeline(reads_class, output_dir, config_file=None, qc_only=False, 
     # Interleave reads
     raw_reads = os.path.join(out_dir, "raw_reads.fastq.gz")
     if reads_class.type == "paired_end":
+        logger.info("Interleaving paired end reads")
         interleave_reads(
             read_1=reads_class.read_1,
             read_2=reads_class.read_2,
@@ -273,20 +281,34 @@ def assembly_pipeline(reads_class, output_dir, config_file=None, qc_only=False, 
             output_directory=out_dir
         )
 
-    # Polishing
-    # todo add polishing to set 1 and 2
 
 # _____________________________________________________BATCHES
 
 
 def batch_assembly_pipeline(input_dir, output_dir, config_file=None, qc_only=False, stringent=False,
                             logger=None, logfile_location=None, logfile_configuration=None):
+    # Check booleans
+    assert isinstance(qc_only, bool), 'Error: qc_only should be a boolean value.'
+    assert isinstance(stringent, bool), 'Error: stringent should be a boolean value.'
+
+    # Batch pipeline
+    input_dir = os.path.expanduser(input_dir)
+    output_dir = os.path.expanduser(output_dir)
+
     # Setting logger if None has been passed
     if logger is None:
+        if logfile_location is None:
+            logfile_location = output_dir
         logger = configure_log(
             location=logfile_location,
             configuration=logfile_configuration
         )
+
+    # Setting in/out to log
+    logger.info(f"input_dir: {input_dir}")
+    logger.info(f"output_dir: {output_dir}")
+    os.makedirs(output_dir, exist_ok=True)
+    count = 0
 
     # Check inputs
     if not os.path.isdir(input_dir):
@@ -296,15 +318,16 @@ def batch_assembly_pipeline(input_dir, output_dir, config_file=None, qc_only=Fal
     else:
         e = f'Batch assembly pipeline:'
         logger.info(e)
-        logger.info(f"input_dir: {input_dir}")
-        logger.info(f"output_dir: {output_dir}")
 
-    os.makedirs(output_dir, exist_ok=True)
+    # Detecting reads
     reads = detect_reads(
         input_directory=input_dir,
         config_file=config_file
     )
+    logger.info(f"Found {len(reads)} reads")
     for read in reads:
+        count = count+1
+        logger.info(f"Running input file #{count}")
         try:
             assembly_pipeline(
                 reads_class=read,
@@ -315,8 +338,8 @@ def batch_assembly_pipeline(input_dir, output_dir, config_file=None, qc_only=Fal
                 logger=logger
             )
         except Exception as e:
-            print(f'PipelineError: Reads: {read.name},  {e}')
+            logger.error(f'PipelineError: Reads: {read.name},  {e}')
             continue
 
-# todo Add specific exceptions (pipeline / function errors for debugging purposes)
-# todo Add logging details across pipelines
+    # Finish batch pipeline
+    logger.info("Batch pipeline complete")

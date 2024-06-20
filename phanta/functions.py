@@ -142,7 +142,7 @@ def trim_pe_reads(read_1, read_2, output_file, ram_mb, read_length, trim_length,
         print(f"Reads trimmed successfully, Q:{read_quality}")
     except Exception as e:
         print(f"Read trimming failed {e}")
-        raise
+        raise e
 
 
 def trim_interleaved_reads(reads, output_file,
@@ -167,7 +167,7 @@ def trim_interleaved_reads(reads, output_file,
         print(f"Reads trimmed successfully, Q:{read_quality}")
     except Exception as e:
         print(f"Read trimming failed {e}")
-        raise
+        raise e
 
 
 def convert_bam_to_fasta(input_reads_bam, output_reads_fasta, ram_mb=20000):
@@ -181,7 +181,7 @@ def convert_bam_to_fasta(input_reads_bam, output_reads_fasta, ram_mb=20000):
         subprocess.run(command, check=True)
     except Exception as e:
         print(f"BAM to FA conversion failed: {e}")
-        raise
+        raise e
     return os.path.abspath(output_reads_fasta)
 
 
@@ -197,7 +197,7 @@ def deduplicate_reads(input_reads, output_reads, ram_mb=20000):
         print(f"Reads deduplicated successfully")
     except Exception as e:
         print(f"Read deduplication failed {e}")
-        raise
+        raise e
 
 
 def normalise_reads(input_reads, output_reads, ram_mb=20000, target_coverage=200):
@@ -214,7 +214,7 @@ def normalise_reads(input_reads, output_reads, ram_mb=20000, target_coverage=200
         print(f"Reads normalised to {target_coverage}x")
     except Exception as e:
         print(f"Read normalisation failed {e}")
-        raise
+        raise e
 
 
 @experimental(description="Unsure if this should be part of the pipeline, needs testing")
@@ -234,7 +234,7 @@ def merge_short_reads(input_reads, output_reads, ram_mb=20000, error_correction=
         return output_reads
     except Exception as e:
         print(f"bbmerge failed {e}")
-        raise
+        raise e
 
 
 def fastqc(reads, output_directory):
@@ -252,8 +252,9 @@ def fastqc(reads, output_directory):
     try:
         subprocess.run(command, check=True)
         print("Reads QC success")
-    except subprocess.CalledProcessError:
+    except subprocess.CalledProcessError as e:
         print("Reads QC failed")
+        raise e
 
 
 def spades_assembly(input_reads, output_directory, ram_mb=20000, threads=8,
@@ -281,7 +282,7 @@ def spades_assembly(input_reads, output_directory, ram_mb=20000, threads=8,
             return None
     except Exception as e:
         print(f"SPAdes genome assembly failed {e}")
-        raise
+        raise e
 
 
 def sam_sort_index(input_reads, output_directory):
@@ -322,7 +323,7 @@ def pilon_polish(genome_fasta, reads_bam, output_directory):
         subprocess.run(command, check=True)
     except Exception as e:
         print(f"Pilon failed {e}")
-        raise
+        raise e
 
 
 def read_mapping(contigs_fasta, reads, output_directory, ram_mb=20000,
@@ -384,7 +385,7 @@ def extract_contig(contigs_fasta, header, output_file, rename=None):
                         break
                     except Exception as e:
                         print(f"Could not extract {output_file}")
-                        raise Exception(f"Could not extract {output_file}: {e}")
+                        raise e
 
 
 def checkv(contigs, output_directory):
@@ -396,8 +397,9 @@ def checkv(contigs, output_directory):
     try:
         subprocess.run(command, check=True)
         print("CheckV successful")
-    except subprocess.CalledProcessError:
+    except subprocess.CalledProcessError as e:
         print("CheckV failed")
+        raise e
 
 
 def generate_coverage_graph(header, basecov, output_directory):
