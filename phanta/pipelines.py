@@ -231,7 +231,7 @@ def assembly_pipeline(reads_class, output_dir, config_file=None, qc_only=False, 
     if os.getenv('CHECKVDB'):
         logger.info(f"CHECKVDB variable detected, running analysis: {os.getenv('CHECKVDB')}")
         if not os.path.isdir(os.getenv('CHECKVDB')):
-            logger.error(f"CheckV database variable does not exist: {os.getenv('CHECKVDB')}")
+            logger.error(f"CheckV database does not exist: {os.getenv('CHECKVDB')}")
         else:
             try:
                 outdir = os.path.join(out, 'CheckV')
