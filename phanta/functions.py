@@ -328,6 +328,7 @@ def pilon_polish(genome_fasta, reads_bam, output_directory):
 
 def read_mapping(contigs_fasta, reads, output_directory, ram_mb=20000,
                  keep_reads=False):
+    os.makedirs(output_directory, exist_ok=True)
     covstats = os.path.join(output_directory, "covstats.tsv")
     basecov = os.path.join(output_directory, "basecov.tsv")
     scafstats = os.path.join(output_directory, "scafstats.tsv")
@@ -389,6 +390,7 @@ def extract_contig(contigs_fasta, header, output_file, rename=None):
 
 
 def checkv(contigs, output_directory):
+    os.makedirs(output_directory, exist_ok=True)
     command = [
         "checkv", "end_to_end",
         f"{contigs}",

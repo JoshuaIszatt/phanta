@@ -177,7 +177,6 @@ def assembly_pipeline(reads_class, output_dir, config_file=None, qc_only=False, 
             reads=read,
             output_directory=out
         )
-    # todo Add multiqc
 
     # Checkpoint
     if qc_only:
@@ -195,7 +194,8 @@ def assembly_pipeline(reads_class, output_dir, config_file=None, qc_only=False, 
     )
 
     # Read mapping (normalised - QC)
-    out = os.path.join(out_dir, 'QC_read_mapping')
+    out = os.path.join(out_dir, 'QC_read_mapping', 'initial')
+    os.makedirs(out, exist_ok=True)
     basecov, covstats, scafstats, mapped, unmapped = read_mapping(
         contigs_fasta=contigs,
         reads=merged_reads,
@@ -212,7 +212,7 @@ def assembly_pipeline(reads_class, output_dir, config_file=None, qc_only=False, 
         raise Exception(f"No contig with >90% reads in {contigs}")
     contig_header = list(df['#name'])[0]
 
-    put_genome = os.path.join(out_dir, 'putative_initial_genome.fasta')
+    put_genome = os.path.join(out_dir, 'putative_genome_initial.fasta')
     extract_contig(
         contigs_fasta=contigs,
         header=contig_header,
@@ -234,7 +234,7 @@ def assembly_pipeline(reads_class, output_dir, config_file=None, qc_only=False, 
             logger.error(f"CheckV database does not exist: {os.getenv('CHECKVDB')}")
         else:
             try:
-                outdir = os.path.join(out, 'CheckV')
+                out = os.path.join(out_dir, 'CheckV', 'initial')
                 checkv(
                     contigs=contigs,
                     output_directory=out
@@ -258,7 +258,8 @@ def assembly_pipeline(reads_class, output_dir, config_file=None, qc_only=False, 
         )
 
         # Read mapping
-        out = os.path.join(out_dir, 'QC_read_remapping')
+        out = os.path.join(out_dir, 'QC_read_mapping', 'mapped')
+        os.makedirs(out, exist_ok=True)
         basecov, covstats, scafstats, mapped, unmapped = read_mapping(
             contigs_fasta=contigs,
             reads=merged_reads,
@@ -275,7 +276,7 @@ def assembly_pipeline(reads_class, output_dir, config_file=None, qc_only=False, 
             raise Exception(f"No contig with >90% reads in {contigs}")
         contig_header = list(df['#name'])[0]
 
-        put_genome = os.path.join(out_dir, 'putative_mapped_genome.fasta')
+        put_genome = os.path.join(out_dir, 'putative_genome_mapped.fasta')
         extract_contig(
             contigs_fasta=contigs,
             header=contig_header,
@@ -289,6 +290,23 @@ def assembly_pipeline(reads_class, output_dir, config_file=None, qc_only=False, 
             basecov=basecov,
             output_directory=out_dir
         )
+
+        # CheckV
+        if os.getenv('CHECKVDB'):
+            logger.info(f"CHECKVDB variable detected, running analysis: {os.getenv('CHECKVDB')}")
+            if not os.path.isdir(os.getenv('CHECKVDB')):
+                logger.error(f"CheckV database does not exist: {os.getenv('CHECKVDB')}")
+            else:
+                try:
+                    out = os.path.join(out_dir, 'CheckV', 'mapped')
+                    checkv(
+                        contigs=contigs,
+                        output_directory=out
+                    )
+                except Exception as e:
+                    logger.warning(e)
+        else:
+            logger.info(f"No Checkv database detected, skipping...")
 
 
 # _____________________________________________________BATCHES
