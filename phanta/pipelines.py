@@ -25,6 +25,8 @@ from .functions import (
 
 
 def detect_reads(input_directory, config_file=None):
+    input_directory = os.path.expanduser(input_directory)
+
     # Set configuration
     if config_file is None:
         config = configure_defaults()
@@ -208,9 +210,13 @@ def assembly_pipeline(reads_class, output_dir, config_file=None, qc_only=False, 
     # Assigning path for mapping files
     bbpath = BBpath(out)
 
-    # Extracting potential genomes
-    contig_header = assess_mapping_data(bbpath)
+    # Assess data for successfully assembled phage
+    contig_header = assess_mapping_data(
+        bbpath=bbpath,
+        cutoff=config['assembly']['cutoff']
+    )
 
+    # Extracting potential genomes
     put_genome = os.path.join(out_dir, 'putative_genome_initial.fasta')
     extract_contig(
         contigs_fasta=contigs,
@@ -270,9 +276,13 @@ def assembly_pipeline(reads_class, output_dir, config_file=None, qc_only=False, 
         # Assigning path for mapping files
         bbpath = BBpath(out)
 
-        # Extracting potential genomes
-        contig_header = assess_mapping_data(bbpath)
+        # Assess data for successfully assembled phage
+        contig_header = assess_mapping_data(
+            bbpath=bbpath,
+            cutoff=config['assembly']['cutoff']
+        )
 
+        # Extracting potential genomes
         put_genome = os.path.join(out_dir, 'putative_genome_mapped.fasta')
         extract_contig(
             contigs_fasta=contigs,
@@ -349,6 +359,8 @@ def batch_assembly_pipeline(input_dir, output_dir, config_file=None, qc_only=Fal
         config_file=config_file
     )
     logger.info(f"Found {len(reads)} reads")
+
+    # Running assembly pipeline
     for read in reads:
         count = count+1
         logger.info(f"Running input file #{count}")

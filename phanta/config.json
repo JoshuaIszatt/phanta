@@ -17,6 +17,7 @@
   "target_coverage": 200
  },
  "assembly": {
-  "kmers": "55,77,99,127"
+  "kmers": "55,77,99,127",
+  "cutoff": 60
  }
 }

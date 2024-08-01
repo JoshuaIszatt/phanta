@@ -366,12 +366,13 @@ def read_mapping(contigs_fasta, reads, output_directory, ram_mb=20000,
         raise PipelineError(f"Read mapping failed {e}")
 
 
-def assess_mapping_data(bbpath):
+def assess_mapping_data(bbpath, cutoff=90):
+    assert cutoff > 50
     df = pd.read_csv(bbpath.scafstats, sep='\t')
-    df = df[df['%unambiguousReads'] >= 90]
+    df = df[df['%unambiguousReads'] >= cutoff]
     if len(df) == 0:
-        print("No contig with >90% reads mapped")
-        raise Exception(f"No contig with >90% reads")
+        print(f"No contig with >{cutoff}% reads mapped")
+        raise Exception(f"No contig with >{cutoff}% reads")
     contig_header = list(df['#name'])[0]
     return contig_header
 

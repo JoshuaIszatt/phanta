@@ -6,7 +6,7 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 setup(
     name="phanta",
-    version="0.3",
+    version="0.4",
     description="Python package to assemble phage illumina reads",
     author="Joshua J Iszatt",
     author_email="joshiszatt@gmail.com",
@@ -19,4 +19,3 @@ setup(
         'phanta': ['config.json', 'logging.json'],
     },
 )
-
