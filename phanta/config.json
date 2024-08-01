@@ -17,7 +17,11 @@
   "target_coverage": 200
  },
  "assembly": {
-  "kmers": "55,77,99,127",
-  "cutoff": 60
+  "kmers": "55,77,99,127"
+ },
+ "extraction": {
+  "mincov": 60,
+  "minlen": 4000,
+  "mincomplete":90
  }
 }

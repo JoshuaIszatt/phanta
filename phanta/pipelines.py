@@ -1,5 +1,4 @@
 import os
-import pandas as pd
 from .classes import PipelineError, BBpath
 from .functions import (
     configure_defaults,
@@ -14,7 +13,6 @@ from .functions import (
     fastqc,
     spades_assembly,
     read_mapping,
-    assess_mapping_data,
     extract_contig,
     generate_coverage_graph,
     checkv
@@ -207,14 +205,16 @@ def assembly_pipeline(reads_class, output_dir, config_file=None, qc_only=False, 
         keep_reads=True
     )
 
-    # Assigning path for mapping files
+    # Parsing mapping data
     bbpath = BBpath(out)
-
-    # Assess data for successfully assembled phage
-    contig_header = assess_mapping_data(
-        bbpath=bbpath,
-        cutoff=config['assembly']['cutoff']
+    contig_header = bbpath.find_genomes(
+        mincov=config['assembly']['mincov'],
+        minlen=config['extraction']['minlen']
     )
+    if contig_header is None:
+        logger.error(f"Reads (minimum: {config['assembly']['mincov']}%) do not map to a single contig")
+    else:
+        logger.info(f"Reads (>{config['assembly']['mincov']}%) map to: {contig_header}")
 
     # Extracting potential genomes
     put_genome = os.path.join(out_dir, 'putative_genome_initial.fasta')
@@ -273,13 +273,11 @@ def assembly_pipeline(reads_class, output_dir, config_file=None, qc_only=False, 
             keep_reads=False
         )
 
-        # Assigning path for mapping files
+        # Parsing mapping data
         bbpath = BBpath(out)
-
-        # Assess data for successfully assembled phage
-        contig_header = assess_mapping_data(
-            bbpath=bbpath,
-            cutoff=config['assembly']['cutoff']
+        contig_header = bbpath.find_genomes(
+            mincov=config['assembly']['mincov'],
+            minlen=config['extraction']['minlen']
         )
 
         # Extracting potential genomes

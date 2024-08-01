@@ -1,3 +1,6 @@
+import pandas as pd
+
+
 # Config error
 class ConfigFileError(Exception):
     """Raised when the configuration file is invalid or corrupt."""
@@ -49,3 +52,42 @@ class BBpath:
         self.mapped = f"{dir_path}/mapped.fastq.gz"
         self.unmapped = f"{dir_path}/unmapped.fastq.gz"
 
+    def find_genomes(self, mincov=90, minlen=4000):
+        # Reading data
+        df = pd.read_csv(self.scafstats, sep='\t')
+        df2 = pd.read_csv(self.covstats, sep='\t')
+        # Minlength
+        parse = list((df2[df2['Length'] >= minlen])['#ID'])
+        df = df[df['#name'].isin(parse)]
+        # Coverage
+        df = df[df['%unambiguousReads'] >= mincov]
+        # Return header
+        try:
+            contig_header = df.loc[df['%unambiguousReads'].idxmax(), '#name']
+            return contig_header
+        except ValueError:
+            return None
+
+
+# Mapping files class (bbmap)
+class CheckvPath:
+    def __init__(self, dir_path):
+        self.complete_genomes = f"{dir_path}/complete_genomes.tsv"
+        self.completeness = f"{dir_path}/completeness.tsv"
+        self.contamination = f"{dir_path}/contamination.tsv"
+        self.proviruses = f"{dir_path}/proviruses.fna"
+        self.quality_summary = f"{dir_path}/quality_summary.tsv"
+        self.viruses = f"{dir_path}/viruses.tsv"
+
+    def find_genomes(self, mincomplete=90, minlen=4000):
+        df = pd.read_csv(self.quality_summary, sep='\t')
+        # Minlength
+        df = df[df['contig_length'] >= minlen]
+        # Mincomplete
+        df = df[df['completeness'] >= mincomplete]
+        # Return headers
+        contig_headers = list(df['contig_id'])
+        return contig_headers
+
+    def return_data(self):
+        pass  # todo Concatenate and return all checkv data
