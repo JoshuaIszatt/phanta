@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-from .classes import PipelineError
+from .classes import PipelineError, BBpath
 from .functions import (
     configure_defaults,
     configure_log,
@@ -14,6 +14,7 @@ from .functions import (
     fastqc,
     spades_assembly,
     read_mapping,
+    assess_mapping_data,
     extract_contig,
     generate_coverage_graph,
     checkv
@@ -196,7 +197,7 @@ def assembly_pipeline(reads_class, output_dir, config_file=None, qc_only=False, 
     # Read mapping (normalised - QC)
     out = os.path.join(out_dir, 'QC_read_mapping', 'initial')
     os.makedirs(out, exist_ok=True)
-    basecov, covstats, scafstats, mapped, unmapped = read_mapping(
+    read_mapping(
         contigs_fasta=contigs,
         reads=merged_reads,
         output_directory=out,
@@ -204,13 +205,11 @@ def assembly_pipeline(reads_class, output_dir, config_file=None, qc_only=False, 
         keep_reads=True
     )
 
+    # Assigning path for mapping files
+    bbpath = BBpath(out)
+
     # Extracting potential genomes
-    df = pd.read_csv(scafstats, sep='\t')
-    df = df[df['%unambiguousReads'] >= 90]
-    if len(df) == 0:
-        print("No contig with >90% reads mapped")
-        raise Exception(f"No contig with >90% reads in {contigs}")
-    contig_header = list(df['#name'])[0]
+    contig_header = assess_mapping_data(bbpath)
 
     put_genome = os.path.join(out_dir, 'putative_genome_initial.fasta')
     extract_contig(
@@ -223,7 +222,7 @@ def assembly_pipeline(reads_class, output_dir, config_file=None, qc_only=False, 
     # Generating coverage graph
     generate_coverage_graph(
         header=contig_header,
-        basecov=basecov,
+        basecov=bbpath.basecov,
         output_directory=out_dir
     )
 
@@ -250,7 +249,7 @@ def assembly_pipeline(reads_class, output_dir, config_file=None, qc_only=False, 
         # Assembly 2
         out = os.path.join(out_dir, "SPAdes_mapped")
         contigs = spades_assembly(
-            input_reads=mapped,
+            input_reads=bbpath.mapped,
             output_directory=out,
             ram_mb=config['system']['RAM'],
             threads=config['system']['threads'],
@@ -260,7 +259,7 @@ def assembly_pipeline(reads_class, output_dir, config_file=None, qc_only=False, 
         # Read mapping
         out = os.path.join(out_dir, 'QC_read_mapping', 'mapped')
         os.makedirs(out, exist_ok=True)
-        basecov, covstats, scafstats, mapped, unmapped = read_mapping(
+        read_mapping(
             contigs_fasta=contigs,
             reads=merged_reads,
             output_directory=out,
@@ -268,13 +267,11 @@ def assembly_pipeline(reads_class, output_dir, config_file=None, qc_only=False, 
             keep_reads=False
         )
 
+        # Assigning path for mapping files
+        bbpath = BBpath(out)
+
         # Extracting potential genomes
-        df = pd.read_csv(scafstats, sep='\t')
-        df = df[df['%unambiguousReads'] >= 90]
-        if len(df) == 0:
-            print("No contig with >90% reads mapped")
-            raise Exception(f"No contig with >90% reads in {contigs}")
-        contig_header = list(df['#name'])[0]
+        contig_header = assess_mapping_data(bbpath)
 
         put_genome = os.path.join(out_dir, 'putative_genome_mapped.fasta')
         extract_contig(
@@ -287,7 +284,7 @@ def assembly_pipeline(reads_class, output_dir, config_file=None, qc_only=False, 
         # Generating coverage graph
         generate_coverage_graph(
             header=contig_header,
-            basecov=basecov,
+            basecov=bbpath.basecov,
             output_directory=out_dir
         )
 

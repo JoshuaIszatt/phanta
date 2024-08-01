@@ -366,6 +366,16 @@ def read_mapping(contigs_fasta, reads, output_directory, ram_mb=20000,
         raise PipelineError(f"Read mapping failed {e}")
 
 
+def assess_mapping_data(bbpath):
+    df = pd.read_csv(bbpath.scafstats, sep='\t')
+    df = df[df['%unambiguousReads'] >= 90]
+    if len(df) == 0:
+        print("No contig with >90% reads mapped")
+        raise Exception(f"No contig with >90% reads")
+    contig_header = list(df['#name'])[0]
+    return contig_header
+
+
 def extract_contig(contigs_fasta, header, output_file, rename=None):
     """
     @param contigs_fasta:

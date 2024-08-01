@@ -34,3 +34,18 @@ class Phage(object):
         self.fasta_hash = fasta_hash
         self.reads_hash = reads_hash
         self.hostname = hostname
+
+
+# Mapping files class (bbmap)
+class BBpath:
+    def __init__(self, dir_path):
+        self.aqhist = f"{dir_path}/aqhist.tsv"
+        self.basecov = f"{dir_path}/basecov.tsv"
+        self.covstats = f"{dir_path}/covstats.tsv"
+        self.gchist = f"{dir_path}/gchist.tsv"
+        self.lhist = f"{dir_path}/lhist.tsv"
+        self.qhist = f"{dir_path}/qhist.tsv"
+        self.scafstats = f"{dir_path}/scafstats.tsv"
+        self.mapped = f"{dir_path}/mapped.fastq.gz"
+        self.unmapped = f"{dir_path}/unmapped.fastq.gz"
+
