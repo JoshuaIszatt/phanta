@@ -66,6 +66,12 @@ import phanta
 phanta.batch_assembly_pipeline('path_to_input_directory/', 'output_directory/', qc_only=True)
 ```
 
+## Citation:
+There is a CITATION file in this repository (.CFF), however Phanta may also be cited like so:
+```
+Iszatt JJ. PHANTA short read assembly pipeline. Published online June 2024. Version <VERSION>. Accessed <ACCESS DATE>. https://github.com/JoshuaIszatt/phanta
+```
+
 ## Dependencies:
   - python>=3
   - checkv==1.0.3
