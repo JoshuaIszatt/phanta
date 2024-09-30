@@ -109,6 +109,11 @@ These are the defaults, amend as required and pass to the pipeline functions
  },
  "assembly": {
   "kmers": "55,77,99,127"
+ },
+ "extraction": {
+  "mincov": 60,
+  "minlen": 4000,
+  "mincomplete":90
  }
 }
 ```
