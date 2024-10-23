@@ -15,6 +15,12 @@ import logging.config
 
 
 def configure_defaults(config_path=None):
+    """
+    Configures using a path to json file with contents as seen on github
+    Returns object read as json
+
+    IF the object given is a json file... # todo Complete this so it can accept dict object
+    """
     if config_path is None:
         config_path = importlib.resources.files("phanta") / "config.json"
     with open(str(config_path), "r") as f:
@@ -24,7 +30,7 @@ def configure_defaults(config_path=None):
             raise ConfigFileError("Default config file is broken, please reinstall.")
     return config
 
-# todo Create get_config() function to obtain the default config file
+# todo Create get_config() function to obtain the default config file in console
 
 
 def configure_log(location=None, configuration=None):

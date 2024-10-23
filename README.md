@@ -1,15 +1,12 @@
 # Phanta
+[![DOI](https://zenodo.org/badge/805719187.svg)](https://doi.org/10.5281/zenodo.13981010)
+
 Configurable short read assembly pipeline for phages:
 ![Phage pipeline](pipeline.png)
 **Figure 1:** Rough phage assembly pipeline, dotted line indicates where processing begins.
 
 ## Install dependencies
-1. Download the yml environment file:
-```sh
-wget https://anaconda.org/JoshIszatt/phanta/2024.05.31.130738/download/phanta.yml
-```
-
-2. Create the environment
+1. Create the environment
 ```sh
 conda env create --file phanta.yml
 ```
@@ -69,7 +66,7 @@ phanta.batch_assembly_pipeline('path_to_input_directory/', 'output_directory/', 
 ## Citation:
 There is a CITATION file in this repository (.CFF), however Phanta may also be cited like so:
 ```
-Iszatt JJ. PHANTA short read assembly pipeline. Published online June 2024. Version <VERSION>. Accessed <ACCESS DATE>. https://github.com/JoshuaIszatt/phanta
+Iszatt, Joshua James. (2024). PHANTA short read assembly pipeline (Version v0.3) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.13981011
 ```
 
 ## Dependencies:
