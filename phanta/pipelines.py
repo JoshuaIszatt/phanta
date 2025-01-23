@@ -208,13 +208,13 @@ def assembly_pipeline(reads_class, output_dir, config_file=None, qc_only=False, 
     # Parsing mapping data
     bbpath = BBpath(out)
     contig_header = bbpath.find_genomes(
-        mincov=config['assembly']['mincov'],
+        mincov=config['extraction']['mincov'],
         minlen=config['extraction']['minlen']
     )
     if contig_header is None:
-        logger.error(f"Reads (minimum: {config['assembly']['mincov']}%) do not map to a single contig")
+        logger.error(f"Reads (minimum: {config['extraction']['mincov']}%) do not map to a single contig")
     else:
-        logger.info(f"Reads (>{config['assembly']['mincov']}%) map to: {contig_header}")
+        logger.info(f"Reads (>{config['extraction']['mincov']}%) map to: {contig_header}")
 
     # Extracting potential genomes
     put_genome = os.path.join(out_dir, 'putative_genome_initial.fasta')
