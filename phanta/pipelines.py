@@ -276,7 +276,7 @@ def assembly_pipeline(reads_class, output_dir, config_file=None, qc_only=False, 
         # Parsing mapping data
         bbpath = BBpath(out)
         contig_header = bbpath.find_genomes(
-            mincov=config['assembly']['mincov'],
+            mincov=config['extraction']['mincov'],
             minlen=config['extraction']['minlen']
         )
 
