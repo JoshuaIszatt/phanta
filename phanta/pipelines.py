@@ -70,6 +70,28 @@ def detect_reads(input_directory, config_file=None):
 
 def assembly_pipeline(reads_class, output_dir, config_file=None, qc_only=False, stringent=False,
                       logger=None, logfile_location=None, logfile_configuration=None):
+    """_summary_
+
+    :param reads_class: _description_
+    :type reads_class: _type_
+    :param output_dir: _description_
+    :type output_dir: _type_
+    :param config_file: _description_, defaults to None
+    :type config_file: _type_, optional
+    :param qc_only: _description_, defaults to False
+    :type qc_only: bool, optional
+    :param stringent: _description_, defaults to False
+    :type stringent: bool, optional
+    :param logger: _description_, defaults to None
+    :type logger: _type_, optional
+    :param logfile_location: _description_, defaults to None
+    :type logfile_location: _type_, optional
+    :param logfile_configuration: _description_, defaults to None
+    :type logfile_configuration: _type_, optional
+    :raises PipelineError: _description_
+    :raises Exception: _description_
+    :raises PipelineError: _description_
+    """
     # Setting logger if None has been passed
     if logger is None:
         if logfile_location is None:
