@@ -1,6 +1,8 @@
 from setuptools import find_packages, setup
 import os
 
+Hello
+
 # Set the base directory location which is the location of the setup.py file
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
