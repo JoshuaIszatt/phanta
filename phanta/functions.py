@@ -32,7 +32,8 @@ def configure_defaults(config_path=None):
 
 # todo Create get_config() function to obtain the default config file in console
 
-
+def hello_word():
+    pass
 def configure_log(location=None, configuration=None):
     # Default logging settings if needed
     if configuration is None:
