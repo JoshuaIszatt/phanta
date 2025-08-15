@@ -18,4 +18,11 @@ setup(
     package_data={
         'phanta': ['config.json', 'logging.json'],
     },
+    install_requires=[
+        "pandas",
+        "numpy",
+        "biopython",
+        "matplotlib",
+        "pytest",
+    ]
 )
