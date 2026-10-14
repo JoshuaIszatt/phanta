@@ -17,8 +17,7 @@ Phanta takes paired-end Illumina reads from a phage isolate and gives you back a
 8. **Pick the phage**: map reads back (`bbmap.sh`) and keep the contig ≥4 kb that recruits the most reads (≥60%)
 9. **Check quality** with CheckV (if `CHECKVDB` is set)
 
-All defaults live in `config.json`, so you can tweak them there. Use `--stringent` to reassemble from mapped reads only.
-
+All defaults live in `config.json`, so you can tweak them there.
 ## Install dependencies
 1. Create the environment
 ```sh
