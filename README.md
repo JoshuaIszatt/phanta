@@ -5,6 +5,20 @@ Configurable short read assembly pipeline for phages:
 ![Phage pipeline](pipeline.png)
 **Figure 1:** Rough phage assembly pipeline, dotted line indicates where processing begins.
 
+## What it does
+Phanta takes paired-end Illumina reads from a phage isolate and gives you back a single putative phage genome. Each step uses a standard tool:
+1. **Interleave** R1/R2 (`reformat.sh`)
+2. **Trim** 10 bp off each end and drop reads below Q30 or 100 bp (`bbduk.sh`)
+3. **Deduplicate** (`dedupe.sh`)
+4. **Merge** overlapping pairs with error correction (`bbmerge.sh`)
+5. **Normalise** to ~200x coverage (`bbnorm.sh`)
+6. **QC** after every step (`FastQC`)
+7. **Assemble** with SPAdes (`--careful`, k = 55,77,99,127)
+8. **Pick the phage**: map reads back (`bbmap.sh`) and keep the contig ≥4 kb that recruits the most reads (≥60%)
+9. **Check quality** with CheckV (if `CHECKVDB` is set)
+
+All defaults live in `config.json`, so you can tweak them there. Use `--stringent` to reassemble from mapped reads only.
+
 ## Install dependencies
 1. Create the environment
 ```sh
